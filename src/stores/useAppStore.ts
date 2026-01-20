@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AppState, ImageItem, AppSettings } from '../types';
+import type { AppState, AppSettings } from '../types';
 import { hasStoredApiKey } from '../services/crypto';
 
 const defaultSettings: AppSettings = {
