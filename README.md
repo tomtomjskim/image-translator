@@ -2,9 +2,14 @@
 
 Gemini AI 기반 이미지 OCR 및 번역 웹 서비스
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![React](https://img.shields.io/badge/React-18.x-61dafb.svg)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![React](https://img.shields.io/badge/React-18.x-61dafb.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)](https://www.typescriptlang.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
+
+## 데모
+
+**Live Demo**: http://141.148.168.113:3003
 
 ## 개요
 
@@ -22,12 +27,15 @@ Gemini AI 기반 이미지 OCR 및 번역 웹 서비스
 
 ## 기술 스택
 
-- **Frontend**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand
-- **AI API**: Google Gemini API (@google/generative-ai)
-- **Encryption**: Web Crypto API (AES-256-GCM)
+| 영역 | 기술 |
+|------|------|
+| **Frontend** | React 18 + TypeScript |
+| **Build Tool** | Vite 7.x |
+| **Styling** | Tailwind CSS 4.x |
+| **State Management** | Zustand |
+| **AI API** | Google Gemini API (@google/generative-ai) |
+| **Encryption** | Web Crypto API (AES-256-GCM) |
+| **Deployment** | Docker + Nginx |
 
 ## 시작하기
 
@@ -37,11 +45,11 @@ Gemini AI 기반 이미지 OCR 및 번역 웹 서비스
 - npm 또는 yarn
 - Gemini API Key ([Google AI Studio](https://aistudio.google.com/apikey)에서 무료 발급)
 
-### 설치
+### 로컬 개발
 
 ```bash
 # 저장소 클론
-git clone https://github.com/your-username/image-translator.git
+git clone https://github.com/tomtomjskim/image-translator.git
 cd image-translator
 
 # 의존성 설치
@@ -51,14 +59,33 @@ npm install
 npm run dev
 ```
 
-### 빌드
+### Docker 배포
 
 ```bash
-# 프로덕션 빌드
-npm run build
+# 이미지 빌드
+docker build -t image-translator .
 
-# 빌드 결과물 미리보기
-npm run preview
+# 컨테이너 실행
+docker run -d -p 3003:80 --name image-translator image-translator
+```
+
+### Docker Compose (권장)
+
+```yaml
+services:
+  image-translator:
+    build:
+      context: ./image-translator
+      dockerfile: Dockerfile
+    container_name: image-translator
+    restart: always
+    ports:
+      - "3003:80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 ```
 
 ## 사용 방법
@@ -72,19 +99,26 @@ npm run preview
 ## 프로젝트 구조
 
 ```
-src/
-├── components/         # React 컴포넌트
-│   ├── common/        # 공통 UI 컴포넌트
-│   ├── ApiKeyManager  # API 키 관리
-│   ├── ImageUploader  # 이미지 업로드
-│   └── ...
-├── services/          # 비즈니스 로직
-│   ├── gemini.ts      # Gemini API 연동
-│   └── crypto.ts      # 암호화/복호화
-├── stores/            # Zustand 상태 관리
-├── hooks/             # Custom Hooks
-├── types/             # TypeScript 타입 정의
-└── utils/             # 유틸리티 함수
+image-translator/
+├── docs/
+│   └── PROJECT_PLAN.md      # 프로젝트 기획서
+├── src/
+│   ├── components/          # React 컴포넌트
+│   │   ├── common/          # 공통 UI (Button, Modal)
+│   │   ├── ApiKeyManager    # API 키 관리
+│   │   ├── ImageUploader    # 이미지 업로드
+│   │   ├── LanguageSelector # 언어 선택
+│   │   └── TranslationResult# 번역 결과
+│   ├── services/            # 비즈니스 로직
+│   │   ├── gemini.ts        # Gemini API 연동
+│   │   └── crypto.ts        # 암호화/복호화
+│   ├── stores/              # Zustand 상태 관리
+│   ├── hooks/               # Custom Hooks
+│   ├── types/               # TypeScript 타입 정의
+│   └── utils/               # 유틸리티 함수
+├── Dockerfile               # Docker 빌드 설정
+├── nginx.conf               # Nginx SPA 설정
+└── README.md
 ```
 
 ## API 모델
@@ -99,6 +133,27 @@ src/
 - API 키는 브라우저의 localStorage에 **AES-256-GCM으로 암호화**되어 저장됩니다
 - 암호화 키는 브라우저 핑거프린트 기반으로 동적 생성됩니다
 - API 키는 외부 서버로 전송되지 않으며 오직 Gemini API 호출에만 사용됩니다
+- 별도의 백엔드 서버 없이 클라이언트에서 직접 API 호출
+
+## 배포 정보
+
+| 환경 | URL | 상태 |
+|------|-----|------|
+| Production | http://141.148.168.113:3003 | ![Status](https://img.shields.io/badge/status-online-success) |
+
+### 인프라 구성
+
+```
+nginx-proxy (:3003) → image-translator (172.20.0.18:80)
+```
+
+## 향후 계획 (v2.0)
+
+- [ ] Nano Banana Pro를 활용한 번역 이미지 자동 생성
+- [ ] 번역 히스토리 저장 (IndexedDB)
+- [ ] 번역 메모리/용어집 기능
+- [ ] Chrome Extension 버전
+- [ ] 다중 이미지 일괄 처리 개선
 
 ## 기여하기
 
@@ -119,3 +174,7 @@ MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 - [Gemini API 공식 문서](https://ai.google.dev/gemini-api/docs)
 - [Nano Banana Pro](https://ai.google.dev/gemini-api/docs/nanobanana)
 - [프로젝트 기획서](docs/PROJECT_PLAN.md)
+
+---
+
+*Built with Gemini AI & React*

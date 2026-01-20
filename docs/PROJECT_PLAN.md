@@ -5,6 +5,8 @@
 | 항목 | 내용 |
 |------|------|
 | **서비스명** | Image Translator |
+| **GitHub** | https://github.com/tomtomjskim/image-translator |
+| **Live Demo** | http://141.148.168.113:3003 |
 | **목적** | 해외 소싱 상품 이미지의 텍스트를 OCR로 인식하여 번역 |
 | **타겟 사용자** | 스마트스토어 셀러, 해외 소싱 사업자 |
 | **핵심 기능** | 이미지 OCR → 번역 → 결과 반환 (선택적 이미지 재생성) |
@@ -94,9 +96,36 @@ const imageGenConfig = {
 
 ---
 
-## 4. 주요 기능 명세
+## 4. 배포 아키텍처
 
-### 4.1 이미지 입력
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Docker Infrastructure                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  nginx-proxy (172.20.0.2)                                       │
+│  ├── :80   → dashboard                                          │
+│  ├── :3001 → lotto-service                                      │
+│  ├── :3002 → today-fortune                                      │
+│  ├── :3003 → image-translator (172.20.0.18) ← NEW              │
+│  ├── :3004 → author-clock                                       │
+│  └── :3005 → blog-automation                                    │
+│                                                                 │
+│  image-translator Container:                                    │
+│  ├── Image: ubuntu-image-translator                             │
+│  ├── Base: nginx:alpine (Multi-stage build)                    │
+│  ├── Memory: 128MB limit                                        │
+│  ├── CPU: 0.2 cores                                             │
+│  └── Health: /health endpoint                                   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 5. 주요 기능 명세
+
+### 5.1 이미지 입력
 - [x] 이미지 파일 업로드 (다중 선택)
 - [x] 이미지 URL 입력 (다중)
 - [x] 드래그 앤 드롭
@@ -104,12 +133,12 @@ const imageGenConfig = {
 - [x] 지원 형식: PNG, JPG, JPEG, WebP, GIF
 - [x] 최대 크기: 10MB per image
 
-### 4.2 번역 설정
+### 5.2 번역 설정
 - [x] 소스 언어: 자동 감지 / 수동 선택
 - [x] 타겟 언어: 한국어, 영어, 중국어(간체/번체), 일본어, 베트남어, 태국어
 - [x] 번역 톤: 일반 / 상품설명 최적화 / 격식체
 
-### 4.3 결과 출력
+### 5.3 결과 출력
 - [x] 원본 이미지 표시
 - [x] 추출된 원문 텍스트
 - [x] 번역된 텍스트
@@ -117,7 +146,7 @@ const imageGenConfig = {
 - [x] JSON 내보내기
 - [ ] (Phase 2) 이미지 재생성 옵션
 
-### 4.4 API 키 관리
+### 5.4 API 키 관리
 - [x] AES-256-GCM 암호화 저장
 - [x] Web Crypto API 사용
 - [x] 마스킹 표시 (앞 4자리만 표시)
@@ -125,9 +154,9 @@ const imageGenConfig = {
 
 ---
 
-## 5. 보안 설계
+## 6. 보안 설계
 
-### 5.1 API 키 암호화 흐름
+### 6.1 API 키 암호화 흐름
 
 ```
 사용자 API 키 입력
@@ -145,7 +174,7 @@ localStorage에 저장: { encrypted, iv }
 
 ---
 
-## 6. 기술 스택
+## 7. 기술 스택
 
 | 영역 | 기술 | 버전 | 선정 이유 |
 |------|------|------|----------|
@@ -156,10 +185,11 @@ localStorage에 저장: { encrypted, iv }
 | **상태관리** | Zustand | 4.x | 가볍고 간단 |
 | **HTTP** | @google/generative-ai | latest | 공식 SDK |
 | **암호화** | Web Crypto API | - | 브라우저 내장, 안전 |
+| **배포** | Docker + Nginx | alpine | 경량화, 정적 파일 서빙 |
 
 ---
 
-## 7. 폴더 구조
+## 8. 폴더 구조
 
 ```
 image-translator/
@@ -193,6 +223,8 @@ image-translator/
 │   ├── App.tsx
 │   ├── main.tsx
 │   └── index.css
+├── Dockerfile                   # Docker 빌드 설정
+├── nginx.conf                   # Nginx SPA 라우팅
 ├── .gitignore
 ├── index.html
 ├── package.json
@@ -203,13 +235,14 @@ image-translator/
 
 ---
 
-## 8. 개발 체크리스트
+## 9. 개발 체크리스트
 
 ### Phase 1: 프로젝트 초기 설정 ✅
 - [x] Vite + React + TypeScript 프로젝트 생성
 - [x] Tailwind CSS 설정
 - [x] 폴더 구조 생성
 - [x] Git 저장소 초기화
+- [x] GitHub 레포지토리 생성
 
 ### Phase 2: 핵심 인프라 ✅
 - [x] API 키 암호화/복호화 모듈 (crypto.ts)
@@ -237,18 +270,78 @@ image-translator/
 - [x] 반응형 디자인
 - [x] 다크모드 지원
 
-### Phase 6: 배포
-- [ ] 빌드 최적화
-- [ ] 정적 호스팅 배포 (Vercel/Netlify/GitHub Pages)
+### Phase 6: 배포 ✅
+- [x] Dockerfile 작성 (Multi-stage build)
+- [x] nginx.conf 설정 (SPA routing)
+- [x] docker-compose.yml 서비스 추가
+- [x] nginx 프록시 설정 (port 3003)
+- [x] 컨테이너 빌드 및 실행
+- [x] GitHub 레포지토리 푸시
 
 ---
 
-## 9. 향후 계획 (v2.0)
+## 10. Gemini 프롬프트 설계
 
-1. Nano Banana Pro를 활용한 번역 이미지 자동 생성
-2. 번역 히스토리 저장 (IndexedDB)
-3. 번역 메모리/용어집 기능
-4. Chrome Extension 버전
+### 10.1 OCR + 번역 프롬프트
+
+```
+You are an expert OCR and translation assistant specialized in product descriptions.
+
+Task:
+1. Extract ALL text from the provided image accurately
+2. Detect the source language
+3. Translate the extracted text to {TARGET_LANGUAGE}
+4. Optimize the translation for e-commerce product descriptions
+
+Rules:
+- Preserve formatting (line breaks, bullet points)
+- Keep brand names, model numbers unchanged
+- Use natural, fluent {TARGET_LANGUAGE}
+- If text is unclear, indicate with [unclear]
+
+Response format (JSON):
+{
+  "detected_language": "detected language name",
+  "original_text": "extracted original text",
+  "translated_text": "translated text",
+  "confidence": "high/medium/low"
+}
+```
+
+### 10.2 이미지 재생성 프롬프트 (Phase 2)
+
+```
+Create a product image with the following translated text overlaid:
+
+Original Image Context: {DESCRIPTION}
+Text to display: {TRANSLATED_TEXT}
+
+Requirements:
+- Maintain the original image style and composition
+- Place text in readable positions
+- Use appropriate font size and color for contrast
+- Professional e-commerce aesthetic
+```
+
+---
+
+## 11. 향후 계획 (v2.0)
+
+- [ ] Nano Banana Pro를 활용한 번역 이미지 자동 생성
+- [ ] 번역 히스토리 저장 (IndexedDB)
+- [ ] 번역 메모리/용어집 기능
+- [ ] Chrome Extension 버전
+- [ ] 다중 이미지 일괄 처리 개선
+- [ ] 도메인 연결 및 HTTPS 설정
+
+---
+
+## 12. 변경 이력
+
+| 날짜 | 버전 | 변경 내용 |
+|------|------|----------|
+| 2026-01-20 | 1.0.0 | 초기 버전 릴리스 |
+| 2026-01-20 | 1.0.1 | Docker 배포 완료, GitHub 연동 |
 
 ---
 
@@ -260,5 +353,5 @@ image-translator/
 
 ---
 
-*문서 버전: 1.0*
+*문서 버전: 1.0.1*
 *최종 수정: 2026-01-20*
