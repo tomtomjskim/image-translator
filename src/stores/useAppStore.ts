@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { AppState, AppSettings, Resolution, AspectRatio } from '../types';
 import { hasStoredApiKey } from '../services/crypto';
+import { IMAGE_CONFIG } from '../utils/constants';
 
 const defaultSettings: AppSettings = {
   sourceLanguage: 'auto',
@@ -17,7 +18,7 @@ export const useAppStore = create<AppState>((set) => ({
   images: [],
   addImages: (items) =>
     set((state) => ({
-      images: [...state.images, ...items].slice(0, 10), // 최대 10개
+      images: [...state.images, ...items].slice(0, IMAGE_CONFIG.maxCount),
     })),
   updateImage: (id, updates) =>
     set((state) => ({
