@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AppState, AppSettings } from '../types';
+import type { AppState, AppSettings, Resolution, AspectRatio } from '../types';
 import { hasStoredApiKey } from '../services/crypto';
 
 const defaultSettings: AppSettings = {
@@ -43,4 +43,18 @@ export const useAppStore = create<AppState>((set) => ({
   setIsProcessing: (value) => set({ isProcessing: value }),
   showApiKeyModal: false,
   setShowApiKeyModal: (value) => set({ showApiKeyModal: value }),
+
+  // Image Generation (Phase 2)
+  imageGenerationEnabled: true,
+  setImageGenerationEnabled: (enabled) => set({ imageGenerationEnabled: enabled }),
+  defaultResolution: '2K' as Resolution,
+  setDefaultResolution: (resolution) => set({ defaultResolution: resolution }),
+  defaultAspectRatio: 'original' as AspectRatio,
+  setDefaultAspectRatio: (aspectRatio) => set({ defaultAspectRatio: aspectRatio }),
+
+  // History (Phase 3)
+  showHistoryPanel: false,
+  setShowHistoryPanel: (value) => set({ showHistoryPanel: value }),
+  autoSaveHistory: true,
+  setAutoSaveHistory: (value) => set({ autoSaveHistory: value }),
 }));

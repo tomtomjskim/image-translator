@@ -1,12 +1,20 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { GeminiOCRResponse, TranslationResult } from '../types';
 import { GEMINI_CONFIG } from '../utils/constants';
+import { setGenAIInstance } from './imageGeneration';
 
 let genAI: GoogleGenerativeAI | null = null;
 
 // Gemini 클라이언트 초기화
 export function initGemini(apiKey: string): void {
   genAI = new GoogleGenerativeAI(apiKey);
+  // 이미지 생성 서비스에도 인스턴스 전달
+  setGenAIInstance(genAI);
+}
+
+// genAI 인스턴스 반환 (다른 서비스에서 사용)
+export function getGenAI(): GoogleGenerativeAI | null {
+  return genAI;
 }
 
 // 이미지를 Base64로 변환

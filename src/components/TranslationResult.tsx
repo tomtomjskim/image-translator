@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ImageItem } from '../types';
 import { Button } from './common/Button';
+import { ImageGenerator } from './ImageGenerator';
 
 interface TranslationResultProps {
   item: ImageItem;
@@ -127,6 +128,14 @@ export function TranslationResult({ item }: TranslationResultProps) {
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* Phase 2: 이미지 생성 섹션 */}
+      <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+        <ImageGenerator
+          originalImage={item.preview}
+          translationResult={result}
+        />
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 import { useCallback } from 'react';
 import { useAppStore } from '../stores/useAppStore';
 import { processImage } from '../services/gemini';
+import { saveTranslation } from '../services/db/operations';
 import type { ImageItem } from '../types';
 
 export function useTranslation() {
-  const { images, updateImage, settings, setIsProcessing } = useAppStore();
+  const { images, updateImage, settings, setIsProcessing, autoSaveHistory } = useAppStore();
 
   // 단일 이미지 번역
   const translateSingleImage = useCallback(
@@ -30,6 +31,16 @@ export function useTranslation() {
           result,
         });
 
+        // 자동 저장 (히스토리)
+        if (autoSaveHistory) {
+          try {
+            await saveTranslation(item.preview, result);
+          } catch (saveError) {
+            console.error('Failed to save to history:', saveError);
+            // 저장 실패는 무시 (번역은 성공했으므로)
+          }
+        }
+
         return result;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Translation failed';
@@ -40,7 +51,7 @@ export function useTranslation() {
         throw error;
       }
     },
-    [updateImage, settings]
+    [updateImage, settings, autoSaveHistory]
   );
 
   // 모든 이미지 번역

@@ -3,15 +3,24 @@ import { ImageUploader } from './components/ImageUploader';
 import { LanguageSelector } from './components/LanguageSelector';
 import { ImagePreview } from './components/ImagePreview';
 import { TranslationResult } from './components/TranslationResult';
+import { HistoryPanel } from './components/History';
 import { Button } from './components/common/Button';
 import { useAppStore } from './stores/useAppStore';
 import { useTranslation } from './hooks/useTranslation';
 import { useApiKey } from './hooks/useApiKey';
+import type { TranslationRecord } from './services/db/schema';
 
 function App() {
-  const { images, clearImages, isProcessing, hasApiKey } = useAppStore();
+  const { images, clearImages, isProcessing, hasApiKey, showHistoryPanel, setShowHistoryPanel } = useAppStore();
   const { translateAllImages, retryTranslation } = useTranslation();
   const { isLoading } = useApiKey();
+
+  // 히스토리에서 선택한 기록 처리
+  const handleHistorySelect = (record: TranslationRecord) => {
+    // TODO: 선택한 기록의 상세 정보 표시
+    console.log('Selected history record:', record);
+    setShowHistoryPanel(false);
+  };
 
   const pendingCount = images.filter((img) => img.status === 'pending').length;
   const completedImages = images.filter((img) => img.status === 'completed');
@@ -176,6 +185,13 @@ function App() {
           </p>
         </div>
       </footer>
+
+      {/* History Panel */}
+      <HistoryPanel
+        isOpen={showHistoryPanel}
+        onClose={() => setShowHistoryPanel(false)}
+        onSelect={handleHistorySelect}
+      />
     </div>
   );
 }
