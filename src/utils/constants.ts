@@ -28,7 +28,7 @@ export const TRANSLATION_TONES = [
 // 이미지 설정
 export const IMAGE_CONFIG = {
   maxSize: 10 * 1024 * 1024, // 10MB
-  maxCount: 10,
+  maxCount: 30,
   acceptedTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'],
   acceptedExtensions: '.png,.jpg,.jpeg,.webp,.gif',
 };

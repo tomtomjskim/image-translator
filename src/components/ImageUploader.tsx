@@ -55,6 +55,25 @@ export function ImageUploader() {
     [addImages, images.length, hasApiKey, setShowApiKeyModal]
   );
 
+  // URL 문자열에서 여러 URL 추출 (쉼표, 줄바꿈, 공백 구분)
+  const parseUrls = (input: string): string[] => {
+    // 쉼표, 줄바꿈, 공백으로 분리
+    const urls = input
+      .split(/[\s,\n]+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
+    // 유효한 URL만 필터링
+    return urls.filter((url) => {
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+  };
+
   const handleUrlAdd = useCallback(() => {
     if (!urlInput.trim()) return;
 
@@ -63,19 +82,25 @@ export function ImageUploader() {
       return;
     }
 
-    try {
-      new URL(urlInput);
-    } catch {
+    const urls = parseUrls(urlInput);
+
+    if (urls.length === 0) {
       alert('올바른 URL을 입력해주세요.');
       return;
     }
 
-    if (images.length >= IMAGE_CONFIG.maxCount) {
+    const remaining = IMAGE_CONFIG.maxCount - images.length;
+    if (remaining <= 0) {
       alert(`최대 ${IMAGE_CONFIG.maxCount}개의 이미지만 추가할 수 있습니다.`);
       return;
     }
 
-    addImages([createImageItemFromUrl(urlInput.trim())]);
+    const urlsToAdd = urls.slice(0, remaining);
+    if (urls.length > remaining) {
+      alert(`${urls.length}개 중 ${urlsToAdd.length}개만 추가됩니다. (최대 ${IMAGE_CONFIG.maxCount}개)`);
+    }
+
+    addImages(urlsToAdd.map(createImageItemFromUrl));
     setUrlInput('');
   }, [urlInput, addImages, images.length, hasApiKey, setShowApiKeyModal]);
 
@@ -175,17 +200,22 @@ export function ImageUploader() {
 
       {/* URL Input */}
       <div className="flex gap-2">
-        <input
-          type="url"
+        <textarea
           value={urlInput}
           onChange={(e) => setUrlInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleUrlAdd()}
-          placeholder="이미지 URL 입력..."
-          className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleUrlAdd();
+            }
+          }}
+          placeholder="이미지 URL 입력... (여러 개는 쉼표, 줄바꿈으로 구분)"
+          rows={2}
+          className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
         />
         <button
           onClick={handleUrlAdd}
-          className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+          className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors self-end"
         >
           추가
         </button>
