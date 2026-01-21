@@ -6,7 +6,7 @@
 |------|------|
 | **서비스명** | Image Translator |
 | **GitHub** | https://github.com/tomtomjskim/image-translator |
-| **Live Demo** | http://141.148.168.113:3003 |
+| **Live Demo** | https://141.148.168.113:3003 |
 | **목적** | 해외 소싱 상품 이미지의 텍스트를 OCR로 인식하여 번역 |
 | **타겟 사용자** | 스마트스토어 셀러, 해외 소싱 사업자 |
 | **핵심 기능** | 이미지 OCR → 번역 → 결과 반환 (선택적 이미지 재생성) |
@@ -19,7 +19,7 @@
 
 | 용도 | 모델명 | API 모델 ID | 특징 |
 |------|--------|-------------|------|
-| **OCR + 번역** | Gemini 2.0 Flash | `gemini-2.0-flash-exp` | 빠른 이미지 인식, 멀티모달 지원 |
+| **OCR + 번역** | Gemini 2.0 Flash | `gemini-2.0-flash` | 빠른 이미지 인식, 멀티모달 지원 |
 | **이미지 재생성** | Nano Banana Pro | `gemini-3-pro-image-preview` | Thinking Mode, 텍스트 렌더링 우수 |
 
 ### 2.2 Nano Banana Pro (Gemini 3 Pro Image) 상세
@@ -144,7 +144,8 @@ const imageGenConfig = {
 - [x] 번역된 텍스트
 - [x] 텍스트 복사 버튼
 - [x] JSON 내보내기
-- [ ] (Phase 2) 이미지 재생성 옵션
+- [x] 이미지 재생성 옵션 (Phase 2)
+- [x] 번역 히스토리 저장 (Phase 3)
 
 ### 5.4 API 키 관리
 - [x] AES-256-GCM 암호화 저장
@@ -325,14 +326,24 @@ Requirements:
 
 ---
 
-## 11. 향후 계획 (v2.0)
+## 11. 구현 현황 및 향후 계획
 
-- [ ] Nano Banana Pro를 활용한 번역 이미지 자동 생성
-- [ ] 번역 히스토리 저장 (IndexedDB)
-- [ ] 번역 메모리/용어집 기능
-- [ ] Chrome Extension 버전
-- [ ] 다중 이미지 일괄 처리 개선
-- [ ] 도메인 연결 및 HTTPS 설정
+### 11.1 구현 완료 (v1.1.0)
+- [x] **Phase 2**: Nano Banana Pro를 활용한 번역 이미지 자동 생성
+- [x] **Phase 3**: 번역 히스토리 저장 (IndexedDB + Dexie.js)
+- [x] 다중 이미지 최대 30개 지원
+- [x] 다중 URL 붙여넣기 지원 (쉼표/줄바꿈 구분)
+- [x] HTTPS 설정 (포트 3003)
+
+### 11.2 향후 계획 (v2.0)
+- [ ] **Phase 4**: 번역 용어집 기능
+- [ ] **Phase 5**: 배치 처리 최적화
+- [ ] **Phase 6**: Chrome Extension 버전
+- [ ] 도메인 연결 및 SSL 인증서
+
+### 11.3 알려진 제한사항
+- **API 제한**: Gemini API Free Tier 사용 시 분당 요청 제한 있음
+- **권장**: 대량 처리 시 Gemini API Pay-as-you-go 활성화 필요
 
 ---
 
@@ -342,6 +353,8 @@ Requirements:
 |------|------|----------|
 | 2026-01-20 | 1.0.0 | 초기 버전 릴리스 |
 | 2026-01-20 | 1.0.1 | Docker 배포 완료, GitHub 연동 |
+| 2026-01-21 | 1.1.0 | Phase 2 (이미지 생성) + Phase 3 (히스토리) 구현 |
+| 2026-01-21 | 1.1.1 | 이미지 최대 30개, 다중 URL 지원, 버그 수정 |
 
 ---
 
@@ -353,5 +366,5 @@ Requirements:
 
 ---
 
-*문서 버전: 1.0.1*
-*최종 수정: 2026-01-20*
+*문서 버전: 1.1.1*
+*최종 수정: 2026-01-21*
