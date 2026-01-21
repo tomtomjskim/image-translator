@@ -35,7 +35,7 @@ export const IMAGE_CONFIG = {
 
 // Gemini 모델 설정
 export const GEMINI_CONFIG = {
-  ocrModel: 'gemini-2.0-flash-exp', // OCR + 번역용
+  ocrModel: 'gemini-2.0-flash', // OCR + 번역용
   imageModel: 'gemini-3-pro-image-preview', // 이미지 생성용 (Nano Banana Pro)
 };
 
