@@ -17,6 +17,20 @@ export function getGenAI(): GoogleGenerativeAI | null {
   return genAI;
 }
 
+// ArrayBuffer를 Base64로 변환 (청크 처리로 스택 오버플로우 방지)
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 8192;
+  let binary = '';
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, Array.from(chunk));
+  }
+
+  return btoa(binary);
+}
+
 // 이미지를 Base64로 변환
 export async function imageToBase64(image: File | string): Promise<{ data: string; mimeType: string }> {
   if (typeof image === 'string') {
@@ -24,7 +38,7 @@ export async function imageToBase64(image: File | string): Promise<{ data: strin
     const response = await fetch(image);
     const blob = await response.blob();
     const buffer = await blob.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    const base64 = arrayBufferToBase64(buffer);
     return {
       data: base64,
       mimeType: blob.type || 'image/jpeg',
